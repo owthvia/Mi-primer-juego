@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Kahoot Fútbol ⚽</title>
+  <title>Kahoot Fútbol PRO ⚽</title>
   <style>
     body {
       margin: 0;
@@ -12,46 +12,54 @@
     }
 
     .tarjeta {
-      margin-top: 50px;
+      margin-top: 40px;
       background: rgba(0,0,0,0.7);
       padding: 30px;
       border-radius: 20px;
       display: inline-block;
+      width: 320px;
     }
 
     img {
-      width: 300px;
-      border-radius: 15px;
-      margin: 20px 0;
+      width: 100%;
+      border-radius: 10px;
+      margin: 15px 0;
     }
 
     button {
       display: block;
-      margin: 10px auto;
+      width: 100%;
+      margin: 8px 0;
       padding: 12px;
-      width: 200px;
-      font-size: 16px;
       border: none;
       border-radius: 10px;
+      font-size: 16px;
       cursor: pointer;
       background: white;
       color: black;
+      transition: 0.3s;
     }
 
-    button:hover {
-      background: yellow;
+    .correcta {
+      background: green !important;
+      color: white;
     }
 
-    #temporizador {
-      font-size: 20px;
-      color: yellow;
+    .incorrecta {
+      background: red !important;
+      color: white;
+    }
+
+    #ranking {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-<h1>⚽ Kahoot de Fútbol</h1>
+<h1>⚽ Kahoot PRO Jugadores</h1>
 <div id="juego"></div>
+<div id="ranking"></div>
 
 <script>
 let jugador = "";
@@ -60,36 +68,45 @@ let preguntaActual = 0;
 let tiempo = 10;
 let intervalo;
 
+let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+
 const preguntas = [
   {
     p: "¿Quién es este jugador?",
-    img: "https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg",
-    opciones: ["Messi", "Cristiano Ronaldo", "Neymar", "Mbappé"],
-    correcta: "Cristiano Ronaldo"
-  },
-  {
-    p: "¿Qué equipo es este?",
-    img: "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
-    opciones: ["Barcelona", "Real Madrid", "PSG", "Juventus"],
-    correcta: "Real Madrid"
+    img: "https://upload.wikimedia.org/wikipedia/commons/8/89/Leo_Messi_20180626.jpg",
+    opciones: ["Messi", "Di María", "Suárez", "Agüero"],
+    correcta: "Messi"
   },
   {
     p: "¿Quién es este jugador?",
-    img: "https://upload.wikimedia.org/wikipedia/commons/8/89/Leo_Messi_20180626.jpg",
-    opciones: ["Messi", "Suárez", "Ronaldo", "Neymar"],
-    correcta: "Messi"
-  }
+    img: "https://upload.wikimedia.org/wikipedia/commons/8/8c/Cristiano_Ronaldo_2018.jpg",
+    opciones: ["Ronaldo", "Benzema", "Bale", "Modric"],
+    correcta: "Ronaldo"
+  },
+  {
+    p: "¿Quién es este jugador?",
+    img: "https://upload.wikimedia.org/wikipedia/commons/3/3b/Neymar_2018.jpg",
+    opciones: ["Vinicius", "Neymar", "Rodrygo", "Firmino"],
+    correcta: "Neymar"
+  },
+
+  // 👉 DUPLICA Y CAMBIA PARA LLEGAR A 25
 ];
+
+// 👉 DUPLICADOR AUTOMÁTICO para llegar a 25 preguntas
+while (preguntas.length < 25) {
+  preguntas.push(preguntas[preguntas.length % 3]);
+}
 
 function iniciar() {
   document.getElementById("juego").innerHTML = `
     <div class="tarjeta">
-      <h2>Escribe tu nombre</h2>
+      <h2>Nombre</h2>
       <input id="nombre">
-      <br>
       <button onclick="empezar()">Jugar</button>
     </div>
   `;
+  mostrarRanking();
 }
 
 function empezar() {
@@ -98,49 +115,36 @@ function empezar() {
 
   puntos = 0;
   preguntaActual = 0;
-  mostrarPregunta();
+  siguientePregunta();
 }
 
-function mostrarPregunta() {
-  if (preguntaActual >= preguntas.length) {
+function siguientePregunta() {
+  if (preguntaActual >= 25) {
     terminar();
     return;
   }
 
-  const pregunta = preguntas[preguntaActual];
-
-  document.getElementById("juego").innerHTML = `
-    <div class="tarjeta">
-      <h2>${pregunta.p}</h2>
-      <img src="${pregunta.img}">
-      <p>⏳ Preparando respuestas...</p>
-    </div>
-  `;
-
-  setTimeout(mostrarRespuestas, 2000);
-}
-
-function mostrarRespuestas() {
   tiempo = 10;
   const pregunta = preguntas[preguntaActual];
 
   let botones = "";
   pregunta.opciones.forEach(op => {
-    botones += `<button onclick="responder('${op}')">${op}</button>`;
+    botones += `<button onclick="responder(this, '${op}')">${op}</button>`;
   });
 
   document.getElementById("juego").innerHTML = `
     <div class="tarjeta">
-      <h2>${pregunta.p}</h2>
+      <h3>${jugador} | ${puntos} pts</h3>
+      <p>${pregunta.p}</p>
       <img src="${pregunta.img}">
       ${botones}
-      <p id="temporizador">⏱️ ${tiempo}</p>
+      <p id="tiempo">⏱️ ${tiempo}</p>
     </div>
   `;
 
   intervalo = setInterval(() => {
     tiempo--;
-    document.getElementById("temporizador").innerText = "⏱️ " + tiempo;
+    document.getElementById("tiempo").innerText = "⏱️ " + tiempo;
 
     if (tiempo <= 0) {
       clearInterval(intervalo);
@@ -149,32 +153,59 @@ function mostrarRespuestas() {
   }, 1000);
 }
 
-function responder(respuesta) {
+function responder(boton, respuesta) {
   clearInterval(intervalo);
 
-  if (respuesta === preguntas[preguntaActual].correcta) {
+  const correcta = preguntas[preguntaActual].correcta;
+  const botones = document.querySelectorAll("button");
+
+  botones.forEach(b => {
+    if (b.innerText === correcta) {
+      b.classList.add("correcta");
+    }
+  });
+
+  if (respuesta === correcta) {
+    boton.classList.add("correcta");
     puntos++;
-    alert("✅ Correcto");
   } else {
-    alert("❌ Incorrecto");
+    boton.classList.add("incorrecta");
   }
 
-  siguiente();
+  setTimeout(siguiente, 1500);
 }
 
 function siguiente() {
   preguntaActual++;
-  mostrarPregunta();
+  siguientePregunta();
 }
 
 function terminar() {
+  ranking.push({ nombre: jugador, puntos });
+  localStorage.setItem("ranking", JSON.stringify(ranking));
+
   document.getElementById("juego").innerHTML = `
     <div class="tarjeta">
-      <h2>🏁 Fin del juego</h2>
-      <p>${jugador}, puntos: ${puntos}</p>
-      <button onclick="iniciar()">Jugar otra vez</button>
+      <h2>Fin</h2>
+      <p>${jugador}: ${puntos} puntos</p>
+      <button onclick="iniciar()">Reiniciar</button>
     </div>
   `;
+
+  mostrarRanking();
+}
+
+function mostrarRanking() {
+  let html = "<h2>🏆 Ranking</h2>";
+
+  ranking
+    .sort((a, b) => b.puntos - a.puntos)
+    .slice(0, 5)
+    .forEach(j => {
+      html += `<p>${j.nombre}: ${j.puntos}</p>`;
+    });
+
+  document.getElementById("ranking").innerHTML = html;
 }
 
 iniciar();
