@@ -1,74 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Juego de Pensar</title>
+  <title>Juego de Matemáticas</title>
   <style>
     body {
       font-family: Arial;
       text-align: center;
-      background: #111;
+      background: #222;
       color: white;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 10px;
+
+    #game {
+      margin-top: 50px;
     }
-    input {
-      padding: 8px;
-      font-size: 16px;
+
+    input, button {
+      padding: 10px;
+      font-size: 18px;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
 
-<h1>Juego de Pensar 🧠</h1>
-<h2 id="nivel">Nivel 1</h2>
-<p id="pregunta"></p>
-
-<input type="text" id="respuesta" placeholder="Escribe tu respuesta">
-<br>
-<button onclick="verificar()">Responder</button>
-
-<p id="mensaje"></p>
+<h1>Juego de Matemáticas 🧠</h1>
+<div id="game"></div>
 
 <script>
-let nivelActual = 0;
-
-const niveles = [
-  { pregunta: "¿Cuánto es 2 + 2?", respuesta: "4" },
-  { pregunta: "Si tienes 3 manzanas y comes 1, ¿cuántas quedan?", respuesta: "2" },
-  { pregunta: "¿Qué número falta? 2, 4, 6, ?", respuesta: "8" },
-  { pregunta: "¿Cuánto es 5 x 3?", respuesta: "15" },
-  { pregunta: "Un triángulo tiene cuántos lados?", respuesta: "3" },
-  { pregunta: "¿Cuánto es 10 / 2?", respuesta: "5" },
-  { pregunta: "¿Qué número sigue? 1, 1, 2, 3, 5, ?", respuesta: "8" },
-  { pregunta: "¿Cuánto es 9 - 4?", respuesta: "5" },
-  { pregunta: "¿Cuánto es 6 + 7?", respuesta: "13" },
-  { pregunta: "Nivel final: escribe la palabra 'ganar'", respuesta: "ganar" }
-];
+let nivel = 1;
 
 function cargarNivel() {
-  document.getElementById("nivel").textContent = "Nivel " + (nivelActual + 1);
-  document.getElementById("pregunta").textContent = niveles[nivelActual].pregunta;
+  const game = document.getElementById("game");
+
+  if (nivel === 1) {
+    game.innerHTML = nivelHTML("5 + 3", 1);
+  }
+
+  if (nivel === 2) {
+    game.innerHTML = nivelHTML("12 - 4", 2);
+  }
+
+  if (nivel === 3) {
+    game.innerHTML = nivelHTML("6 × 3", 3);
+  }
+
+  if (nivel === 4) {
+    game.innerHTML = nivelHTML("20 ÷ 4", 4);
+  }
+
+  if (nivel === 5) {
+    game.innerHTML = nivelHTML("15 + 6 - 3", 5);
+  }
+
+  if (nivel === 6) {
+    game.innerHTML = nivelHTML("8 × 2 + 4", 6);
+  }
+
+  if (nivel === 7) {
+    game.innerHTML = nivelHTML("30 ÷ 5 + 7", 7);
+  }
+
+  if (nivel === 8) {
+    game.innerHTML = nivelHTML("10 + 5 × 2", 8);
+  }
+
+  if (nivel === 9) {
+    game.innerHTML = nivelHTML("(6 + 4) × 2", 9);
+  }
+
+  if (nivel === 10) {
+    game.innerHTML = nivelHTML("50 ÷ (5 + 5)", 10);
+  }
+
+  if (nivel > 10) {
+    game.innerHTML = "<h2>🎉 ¡Ganaste todo el juego!</h2>";
+  }
 }
 
-function verificar() {
-  const respuestaUsuario = document.getElementById("respuesta").value.toLowerCase();
+function nivelHTML(pregunta, nivelActual) {
+  return `
+    <h2>Nivel ${nivelActual}</h2>
+    <p>Resuelve: ${pregunta}</p>
+    <input id="respuesta">
+    <br>
+    <button onclick="verificar(${nivelActual})">Responder</button>
+  `;
+}
 
-  if (respuestaUsuario === niveles[nivelActual].respuesta) {
-    nivelActual++;
+function verificar(n) {
+  const r = document.getElementById("respuesta").value;
 
-    if (nivelActual === niveles.length) {
-      document.body.innerHTML = "<h1>🎉 ¡Ganaste el juego!</h1>";
-      return;
-    }
+  const respuestas = {
+    1: 8,
+    2: 8,
+    3: 18,
+    4: 5,
+    5: 18,
+    6: 20,
+    7: 13,
+    8: 20,
+    9: 20,
+    10: 5
+  };
 
-    document.getElementById("mensaje").textContent = "¡Correcto! Pasas al siguiente nivel.";
-    document.getElementById("respuesta").value = "";
+  if (r == respuestas[n]) {
+    alert("✅ Correcto");
+    nivel++;
     cargarNivel();
   } else {
-    document.getElementById("mensaje").textContent = "Incorrecto, intenta otra vez.";
+    alert("❌ Incorrecto, intenta otra vez");
   }
 }
 
