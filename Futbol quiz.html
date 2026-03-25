@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz de Fútbol ⚽</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #0b6623;
+      color: white;
+    }
+
+    #game {
+      margin-top: 30px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    #timer {
+      font-size: 20px;
+      color: yellow;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Quiz de Fútbol ⚽</h1>
+
+<div id="game"></div>
+<div id="ranking"></div>
+
+<script>
+let jugador = "";
+let preguntaActual = 0;
+let puntos = 0;
+let tiempo = 10;
+let intervalo;
+
+let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+
+const preguntas = [
+  { p: "¿Quién ganó el Mundial 2018?", r: "francia" },
+  { p: "¿En qué equipo jugó Messi la mayor parte de su carrera?", r: "barcelona" },
+  { p: "¿Cuántos jugadores hay en un equipo?", r: "11" },
+  { p: "¿Quién es conocido como CR7?", r: "ronaldo" },
+  { p: "¿Qué país ganó el Mundial 2010?", r: "españa" },
+  { p: "¿Qué jugador tiene más Balones de Oro?", r: "messi" },
+  { p: "¿Qué equipo es el Real Madrid rival histórico?", r: "barcelona" },
+  { p: "¿Qué país es Neymar?", r: "brasil" },
+  { p: "¿Qué competición es la más importante de clubes?", r: "champions" },
+  { p: "¿Quién ganó el Mundial 2022?", r: "argentina" }
+];
+
+function iniciar() {
+  document.getElementById("game").innerHTML = `
+    <h2>Escribe tu nombre</h2>
+    <input id="nombre">
+    <br>
+    <button onclick="empezar()">Empezar</button>
+  `;
+  mostrarRanking();
+}
+
+function empezar() {
+  jugador = document.getElementById("nombre").value;
+  if (jugador === "") return alert("Escribe tu nombre");
+
+  preguntaActual = 0;
+  puntos = 0;
+  siguientePregunta();
+}
+
+function siguientePregunta() {
+  if (preguntaActual >= preguntas.length) {
+    terminarJuego();
+    return;
+  }
+
+  tiempo = 10;
+  const pregunta = preguntas[preguntaActual];
+
+  document.getElementById("game").innerHTML = `
+    <h2>${jugador}</h2>
+    <p>${pregunta.p}</p>
+    <input id="respuesta">
+    <br>
+    <button onclick="verificar()">Responder</button>
+    <p id="timer">Tiempo: ${tiempo}</p>
+  `;
+
+  intervalo = setInterval(actualizarTiempo, 1000);
+}
+
+function actualizarTiempo() {
+  tiempo--;
+  document.getElementById("timer").innerText = "Tiempo: " + tiempo;
+
+  if (tiempo <= 0) {
+    clearInterval(intervalo);
+    preguntaActual++;
+    siguientePregunta();
+  }
+}
+
+function verificar() {
+  clearInterval(intervalo);
+
+  const respuesta = document.getElementById("respuesta").value.toLowerCase();
+  const correcta = preguntas[preguntaActual].r;
+
+  if (respuesta === correcta) {
+    puntos++;
+    alert("✅ Correcto");
+  } else {
+    alert("❌ Incorrecto");
+  }
+
+  preguntaActual++;
+  siguientePregunta();
+}
+
+function terminarJuego() {
+  ranking.push({ nombre: jugador, puntos: puntos });
+
+  localStorage.setItem("ranking", JSON.stringify(ranking));
+
+  document.getElementById("game").innerHTML = `
+    <h2>Juego terminado</h2>
+    <p>${jugador}, tu puntuación: ${puntos}</p>
+    <button onclick="iniciar()">Jugar otra vez</button>
+  `;
+
+  mostrarRanking();
+}
+
+function mostrarRanking() {
+  let html = "<h2>🏆 Ranking</h2>";
+
+  ranking
+    .sort((a, b) => b.puntos - a.puntos)
+    .slice(0, 5)
+    .forEach(j => {
+      html += `<p>${j.nombre}: ${j.puntos}</p>`;
+    });
+
+  document.getElementById("ranking").innerHTML = html;
+}
+
+iniciar();
+</script>
+
+</body>
+</html>
