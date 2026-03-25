@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body style="text-align:center; background:black; color:white;">
+
+<h1>Puntos: <span id="score">0</span></h1>
+<button onclick="sumar()">Haz clic</button>
+
+<script>
+let puntos = 0;
+function sumar() {
+  puntos++;
+  document.getElementById("score").textContent = puntos;
+}
+</script>
+
+</body>
+</html>
